@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Team HN RP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background-image: url('cube.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: white;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    /* ✅ Bild oben rechts fixieren */
+    .top-right-image {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 120px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 40px;
+      width: 100%;
+      max-width: 1600px;
+    }
+
+    .left, .middle, .right {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    h1, h2 {
+      text-align: left;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #3d013a;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    li:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      box-shadow: 0 0 10px red, 0 0 20px red;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .info-display {
+      white-space: pre-wrap;
+      color: #fff;
+      font-size: 1.1em;
+      line-height: 1.5;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 8px;
+      min-height: 200px;
+    }
+
+    .search {
+      padding: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .delete-btn {
+      background-color: #fd60fd;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .role-btn {
+      background-color: #444;
+      margin-top: 10px;
+    }
+
+    .role {
+      font-weight: bold;
+      margin-left: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Dropdown */
+    #roleSelect {
+      background-color: #660000;
+      color: white;
+      border: 2px solid red;
+      border-radius: 6px;
+      padding: 6px;
+      font-weight: bold;
+    }
+    #roleSelect option {
+      background-color: #660000;
+      color: white;
+    }
+
+    /* Blitz-Animation */
+    @keyframes lightning {
+      0%   { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+      25%  { text-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+      50%  { text-shadow: 0 0 5px currentColor, 0 0 15px currentColor; }
+      75%  { text-shadow: 0 0 30px currentColor, 0 0 60px currentColor; }
+      100% { text-shadow: 0 0 10px currentColor, 0 0 25px currentColor; }
+    }
+
+    /* 🔴 Dunkelrot */
+    .role.Inhaber, 
+    .role["Stv.Inhaber"], 
+    .role.Assistent {
+      color: #8B0000;
+      text-shadow: 0 0 5px #8B0000, 0 0 15px #FF0000;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* 🔴 Hellrot */
+    .role.Owner, 
+    .role["Owner Assistent"], 
+    .role.Projektleitung, 
+    .role["Stv.Projektleitung"] {
+      color: #FF3333;
+      text-shadow: 0 0 5px #FF3333, 0 0 15px #FF6666;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* 🟣 Lila */
+    .role["DC Techniker"] {
+      color: #9933FF;
+      text-shadow: 0 0 5px #9933FF, 0 0 15px #CC66FF;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* 🟡 Gelb */
+    .role.Management, 
+    .role.Teamleitung, 
+    .role["Stv.Teamleitung"] {
+      color: #FFD700;
+      text-shadow: 0 0 5px #FFD700, 0 0 15px #FFFF99;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* ⚫ Schwarz */
+    .role["Administrator Leitung"], 
+    .role["Super Administrator"], 
+    .role.Administrator, 
+    .role["T. Administrator"] {
+      color: #000000;
+      text-shadow: 0 0 5px #444, 0 0 15px #777;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* 🔵 Hellblau */
+    .role.Moderator, 
+    .role["T.Moderator"] {
+      color: #33CCFF;
+      text-shadow: 0 0 5px #33CCFF, 0 0 15px #66E0FF;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* 🟢 Grün */
+    .role.Eventleitung, 
+    .role.Supportleitung, 
+    .role["Head Supporter"], 
+    .role.Supporter, 
+    .role["T Supporter"] {
+      color: #00FF66;
+      text-shadow: 0 0 5px #00FF66, 0 0 15px #66FFAA;
+      animation: lightning 1.5s infinite;
+    }
+
+    /* ❌ Button zum Entfernen */
+    .remove-role {
+      color: white;
+      margin-left: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .remove-role:hover {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Bild oben rechts -->
+  <img src="DE5F04A0-DA09-4338-8CE7-F00790FE25BB.jpeg" alt="Rose" class="top-right-image">
+
+  <div class="container">
+    <!-- Linke Seite -->
+    <div class="left">
+      <h2>Spieler hinzufügen</h2>
+      <input type="text" id="todoInput" placeholder="Spieler">
+      <textarea id="infoInput" placeholder="Informationen" rows="4"></textarea>
+      <button onclick="addTodo()">Hinzufügen</button>
+
+      <input type="text" id="searchInput" class="search" placeholder="Spieler suchen...">
+
+      <ul id="todoList"></ul>
+    </div>
+
+    <!-- Mittlere Spalte -->
+    <div class="middle">
+      <h2>Informationen</h2>
+      <div id="infoDisplay" class="info-display">Wähle einen Spieler aus der Liste aus, um Informationen anzuzeigen.</div>
+      <button id="deleteBtn" class="delete-btn" onclick="deleteSelected()">Löschen</button>
+      <br>
+      <select id="roleSelect" style="display:none; margin-top:10px;">
+        <option value="">-- Rolle auswählen --</option>
+        <option value="Inhaber">Inhaber</option>
+        <option value="Stv.Inhaber">Stv.Inhaber</option>
+        <option value="Assistent">Assistent</option>
+        <option value="Owner">Owner</option>
+        <option value="Owner Assistent">Owner Assistent</option>
+        <option value="Projektleitung">Projektleitung</option>
+        <option value="Stv.Projektleitung">Stv.Projektleitung</option>
+        <option value="DC Techniker">DC Techniker</option>
+        <option value="Management">Management</option>
+        <option value="Teamleitung">Teamleitung</option>
+        <option value="Stv.Teamleitung">Stv.Teamleitung</option>
+        <option value="Administrator Leitung">Administrator Leitung</option>
+        <option value="Super Administrator">Super Administrator</option>
+        <option value="Administrator">Administrator</option>
+        <option value="T. Administrator">T. Administrator</option>
+        <option value="Moderator">Moderator</option>
+        <option value="T.Moderator">T.Moderator</option>
+        <option value="Eventleitung">Eventleitung</option>
+        <option value="Supportleitung">Supportleitung</option>
+        <option value="Head Supporter">Head Supporter</option>
+        <option value="Supporter">Supporter</option>
+        <option value="T Supporter">T Supporter</option>
+      </select>
+      <button id="addRoleBtn" class="role-btn" style="display:none;" onclick="addRole()">Rolle hinzufügen</button>
+    </div>
+
+    <!-- Rechte Spalte -->
+    <div class="right">
+      <h2>Mitglieder</h2>
+      <ul id="overviewList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let selectedPlayer = null;
+
+    window.onload = function () {
+      const todos = JSON.parse(localStorage.getItem('todos')) || [];
+      todos.forEach(todo => {
+        addTodoToDOM(todo.text, todo.info, todo.completed, todo.roles || []);
+      });
+    };
+
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const infoInput = document.getElementById('infoInput');
+      const text = input.value.trim();
+      const info = infoInput.value.trim();
+      if (text === '') return;
+
+      addTodoToDOM(text, info, false, []);
+      input.value = '';
+      infoInput.value = '';
+      saveTodos();
+    }
+
+    function addTodoToDOM(text, info, completed, roles=[]) {
+      const li = document.createElement('li');
+      li.setAttribute('data-text', text);
+      li.setAttribute('data-info', info);
+      li.setAttribute('data-roles', JSON.stringify(roles));
+      if (completed) li.classList.add('completed');
+
+      updateListItemDisplay(li);
+
+      li.onclick = function () {
+        document.getElementById('infoDisplay').textContent = info || "Keine Informationen verfügbar.";
+        document.getElementById('deleteBtn').style.display = 'inline-block';
+        document.getElementById('roleSelect').style.display = 'inline-block';
+        document.getElementById('addRoleBtn').style.display = 'inline-block';
+        selectedPlayer = li;
+      };
+
+      document.getElementById('todoList').appendChild(li);
+      updateOverview();
+    }
+
+    function updateListItemDisplay(li){
+      const text = li.getAttribute('data-text');
+      const roles = JSON.parse(li.getAttribute('data-roles')) || [];
+
+      li.innerHTML = text; 
+      roles.forEach(r => {
+        const span = document.createElement('span');
+        span.className = 'role ' + r;
+        span.textContent = ` ${r}`;
+
+        const removeBtn = document.createElement('span');
+        removeBtn.className = 'remove-role';
+        removeBtn.textContent = "❌";
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          removeRole(li, r);
+        };
+
+        span.appendChild(removeBtn);
+        li.appendChild(span);
+      });
+    }
+
+    function addRole(){
+      if (!selectedPlayer) return;
+      const role = document.getElementById('roleSelect').value;
+      if (!role) return;
+
+      let roles = JSON.parse(selectedPlayer.getAttribute('data-roles')) || [];
+      if (!roles.includes(role)) roles.push(role);
+      selectedPlayer.setAttribute('data-roles', JSON.stringify(roles));
+      updateListItemDisplay(selectedPlayer);
+      saveTodos();
+      updateOverview();
+    }
+
+    function removeRole(li, role){
+      let roles = JSON.parse(li.getAttribute('data-roles')) || [];
+      roles = roles.filter(r => r !== role);
+      li.setAttribute('data-roles', JSON.stringify(roles));
+      updateListItemDisplay(li);
+      saveTodos();
+      updateOverview();
+    }
+
+    function deleteSelected() {
+      if (selectedPlayer) {
+        selectedPlayer.remove();
+        document.getElementById('infoDisplay').textContent = "Wähle einen Spieler aus der Liste aus, um Informationen anzuzeigen.";
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('roleSelect').style.display = 'none';
+        document.getElementById('addRoleBtn').style.display = 'none';
+        selectedPlayer = null;
+        saveTodos();
+        updateOverview();
+      }
+    }
+
+    function saveTodos() {
+      const listItems = document.querySelectorAll('#todoList li');
+      const todos = [];
+
+      listItems.forEach(li => {
+        const text = li.getAttribute('data-text');
+        const info = li.getAttribute('data-info') || "";
+        const completed = li.classList.contains('completed');
+        const roles = JSON.parse(li.getAttribute('data-roles')) || [];
+        todos.push({ text, info, completed, roles });
+      });
+
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function updateOverview() {
+      const overview = document.getElementById('overviewList');
+      overview.innerHTML = '';
+      const items = document.querySelectorAll('#todoList li');
+      items.forEach(item => {
+        const clone = item.cloneNode(true);
+        clone.onclick = null;
+        overview.appendChild(clone);
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const query = this.value.toLowerCase();
+      const items = document.querySelectorAll('#todoList li');
+
+      items.forEach(item => {
+        const name = item.getAttribute('data-text').toLowerCase();
+        if (name.includes(query)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      updateOverview();
+    });
+  </script>
+
+</body>
+</html>
